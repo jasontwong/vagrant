@@ -1,0 +1,19 @@
+# file managed by puppet
+<VirtualHost *:80>
+    VirtualDocumentRoot "/var/www/%-3"
+    ServerName kratedev.local
+
+    <Directory /var/www>
+        Options -Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+    </Directory>
+
+    LogLevel Debug
+    ErrorLog "/var/log/apache2/kratedev.local-error.log"
+    CustomLog "/var/log/apache2/kratedev.local-error.log" combined
+
+    SetEnv KRATEDEV 1
+    ServerSignature Off
+</VirtualHost>

@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+debug = false
+Vagrant::Config.run do |config|
+    # All Vagrant configuration is done here. The most common configuration
+    # options are documented and commented below. For a complete reference,
+    # please see the online documentation at vagrantup.com.
+    
+    # Every Vagrant virtual environment requires a box to build off of.
+    config.vm.box = "precise64"
+    config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    config.package.name = "kratedev.box"
+
+    if debug
+        config.vm.boot_mode = :gui
+    end
+    config.vm.define :kratedev do |kratedev_config|
+        kratedev_config.vm.network :hostonly, "33.33.33.10"
+        kratedev_config.vm.host_name = "kratedev.local"
+        kratedev_config.vm.share_folder("v-root", "/vagrant", ".", :extra => 'dmode=777,fmode=777')
+        # kratedev_config.vm.share_folder("www", "/var/www", "/path/to/www", :extra => 'dmode=777,fmode=777', :owner => 'www-data', :group => 'www-data')
+        kratedev_config.vm.customize [
+            'setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/www', '1'
+        ]
+        kratedev_config.vm.customize [
+            'modifyvm', :id, '--chipset', 'ich9'
+        ]
+
+        # puppet
+        kratedev_config.vm.provision :puppet do |puppet|
+            puppet.manifests_path = "support/puppet/manifests"
+            puppet.module_path = "support/puppet/modules"
+            puppet.manifest_file = "kratedev.pp"
+            if debug
+                puppet.options = [
+                    '--verbose',
+                    '--debug',
+                ]
+            end
+        end
+    end
+end
